@@ -8,13 +8,7 @@ public class Employee
 	private String name;
 	private int salary;
 	private List<Employee> subordinates;
-	private int totalDirectSalary;
-	private int noDirectSubordinates;
-	private List<Employee> totalSubordinates;
 	
-	
-    
-    //Constructor, Time O(1), Space O(1)
     public Employee(int id,  String name, int managerId, int salary) 
     {    
 	        this.id = id;	        
@@ -22,18 +16,6 @@ public class Employee
 	        this.managerId = managerId;
 	        this.salary=salary;
 	        
-    }
-    public void setTotalDirectSalary(int totalDirectSalary)
-    {
-    	this.totalDirectSalary=totalDirectSalary;
-    }
-    public void setNoDirectSubordinates(int noDirectSubordinates)
-    {
-    	this.noDirectSubordinates=noDirectSubordinates;
-    }
-    public void setTotalSubordinates(List<Employee> totalSubordinates)
-    {
-    	this.totalSubordinates=totalSubordinates;
     }
     public void setSubordinates(List<Employee> subordinates)
     {
@@ -44,6 +26,10 @@ public class Employee
     {
     	return id;
     }
+    public String getName()
+    {
+    	return name;
+    }
     public int getManagerId()
     {
     	return managerId;
@@ -52,21 +38,9 @@ public class Employee
     {
     	return salary;
     }
-    public int getTotalSalary()
-    {
-    	return totalDirectSalary;
-    }
-    public int getSubordinatesNo()
-    {
-    	return noDirectSubordinates;
-    }
     public List<Employee> getSubordinates()
     {
     	return this.subordinates;
-    }
-    public List<Employee> getTotalSubordinates()
-    {
-    	return this.totalSubordinates;
     }
 
 }

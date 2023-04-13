@@ -17,30 +17,48 @@ public class EmployeeActions
 	
 	public boolean employeeAdd(int eid,String ename,int mid,int esalary)
 	{
-		if (employees.containsKey(eid)) 
-			return false;
-		else
-	    {
-			employees.put(eid, new Employee(eid, ename, mid, esalary));
-			return true;
-	    }
+			if (employees.containsKey(eid)) 
+				return false;
+			else if (!employees.containsKey(mid) && mid!=0)
+			{
+				System.out.println("Manager not found!!");
+				return false;
+			}
+			else
+		    {
+				employees.put(eid, new Employee(eid, ename, mid, esalary));
+				return true;
+		    }
 	}
 	public Map<Integer,Employee> display()
 	{
 		return employees;
 	}
-	public Employee displayEmployeeDetails(int eid) 
+	
+	public void displayEmployeeDetails(int eid) 
 	{
-			return employees.get(eid);
+			Employee e = employees.get(eid);
+			System.out.println("ID: "+ e.getId());
+			System.out.println("Name: "+ e.getName());
+			System.out.println("Manager ID: "+ e.getManagerId());
+			System.out.println("Salary: "+ e.getSalary());
 	}
+	
 	public Employee getRoot(int root)
 	{
 		return employees.get(root);
 	}
-	public void getTree()
+	
+	public void getOrganizationTree()
 	{
+		System.out.println("ORGANIZATION TREE");
 		employees.forEach((k, v) -> {
-            System.out.println(k+":"+v.getSubordinates());
+            System.out.print(employees.get(k).getName()+": ");//get name of employee with id 'k'
+            for(Employee e:v.getSubordinates())					//get name of all subordinates of 'k'
+            {
+            	System.out.print(e.getName()+"\t");
+            }
+            System.out.println();
         });
 	}
 	
@@ -53,79 +71,82 @@ public class EmployeeActions
 			 return;
 		 for (Employee em : subs) 
 	    	buildHierarchyTree(em);
-		 
-		 getTree();
 	 }	 
 	 
 	private List<Employee> getSubsById(int managerId) 
 	{
-		int totalSalary=0;
 		 List<Employee> subs = new ArrayList<Employee>();
 		 for (Employee em : employees.values()) 
 		 {
 			 if (em.getManagerId() == managerId) 
 			 {
 				 subs.add(em);
-				 totalSalary+=em.getSalary();
 			 }
 		 }
-		 Employee e=employees.get(managerId);
-		 e.setTotalDirectSalary(totalSalary);
-		 e.setNoDirectSubordinates(subs.size());
 		 return subs;
 	}
 	
-	public void findUnderpaidWorkers()
+	public int totalSubordinateSalaray(Employee e)
 	{
-		List<Employee> underpaidWorkers = new ArrayList<Employee>();
-		int totalSubordinateSalary=0, totalSubordinateNumber=0;
-		int count=0;
-		
-		for(Employee emp :employees.values()) 
-	    {
-			transverse(emp);
-			emp.setTotalSubordinates(subsTotal);
-			subsTotal.clear();
-	    }
-		for(Employee emp :employees.values()) 
-	    {
-			for(Employee e:emp.getTotalSubordinates())
-			{
-				totalSubordinateSalary+=e.getSalary();
-			}
-			int l=emp.getTotalSubordinates().size();
-			if(l!=0)
-			{
-				if (emp.getSalary()<(totalSubordinateSalary/l))
-				{
-					underpaidWorkers.add(emp);
-					count++;
-				}
-	    	}
-	    }
-		System.out.println(underpaidWorkers);
-		System.out.println("Count:"+count);
-		
+		if (e.getSubordinates().isEmpty())
+		{
+			return 0;
+		}
+		int total=0;
+		for(Employee emp:e.getSubordinates())
+		{
+			total+=emp.getSalary();
+			total+=totalSubordinateSalaray(emp);	
+		}
+		return total;
 		
 	}
-	
-		public void transverse(Employee e)
+	public int totalSubordinateNo(Employee e)
+	{
+		if (e.getSubordinates().isEmpty())
 		{
-			//List<Employee> subsTotal=null;
-			if (e.getSubordinatesNo()!=0)
-			{
-				for(Employee emp:e.getSubordinates())
-				{
-					subsTotal.add(emp);
-					transverse(emp);	
-				}
-			}
-			//e.setTotalSubordinates(subsTotal)
-			
-			
+			return 0;
 		}
+		int totalCount=e.getSubordinates().size();
+		for(Employee emp:e.getSubordinates())
+		{
+			totalCount+=totalSubordinateNo(emp);	
+		}
+		return totalCount;
+	}
+	public boolean isUnderPaid(Employee emp) 
+	{
+		try
+		{
+			if(emp.getSalary()<(totalSubordinateSalaray(emp)/totalSubordinateNo(emp))) 
+			{
+				return true;
+			}
+		}
+		catch(ArithmeticException ae)
+		{
+			return false; //divide by 0 means leaf node so no children so can't be underpaid
+		}
+		return false;
+	}
 	
-	
-
+	public void findUnderpaidWorkers() 
+	{
+		List<Employee> underpaidWorkers = new ArrayList<Employee>();
+		
+		employees.forEach((employeeId, emp) ->{
+			if(isUnderPaid(emp)) 
+			{
+				underpaidWorkers.add(emp);
+			}
+		});
+		
+		System.out.println("Under Paid Employees are:");
+		for(Employee e:underpaidWorkers)
+		{
+			System.out.println(e.getName());
+		}
+		System.out.println("No. of Under Paid Employees: "+ underpaidWorkers.size());
+	}
 
 }
