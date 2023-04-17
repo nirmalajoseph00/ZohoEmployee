@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 
 public class EmployeeActions 
@@ -11,21 +12,40 @@ public class EmployeeActions
 	private Map<Integer,Employee> employees=new HashMap<>();
 	public List<Employee> subsTotal = new ArrayList<Employee>();
 	
+	public static Scanner scan=new Scanner(System.in);
+	
 	
 	public boolean employeeAdd(int eid,String ename,int mid,int esalary)
 	{
+		try
+		{
 			if (employees.containsKey(eid)) 
-				return false;
+			{
+				throw new EmployeeIdExistsException("Employee with id "+ eid + " already exists");
+			}
 			else if (!employees.containsKey(mid) && mid!=0)
 			{
-				System.out.println("Manager not found!!");
-				return false;
+				throw new ManagerNotFoundException("Manager with id "+ mid + " does not exist");
 			}
 			else
 		    {
 				employees.put(eid, new Employee(eid, ename, mid, esalary));
 				return true;
 		    }
+		}
+		catch(ManagerNotFoundException m)
+		{
+			System.out.println(m.getMessage());
+			System.out.println("Enter employee's manager id: ");
+			int managerId = scan.nextInt();
+			employees.put(eid, new Employee(eid, ename, managerId, esalary));
+			return true;
+		} 
+		catch (EmployeeIdExistsException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
 	}
 	public Map<Integer,Employee> display()
 	{
